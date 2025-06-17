@@ -4,14 +4,24 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
+import com.example.notesappcompose.model.Note
 import com.example.notesappcompose.ui.theme.NotesAppComposeTheme
+
+
+
+
+
+
+
+
+
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -19,11 +29,8 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             NotesAppComposeTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    Greeting(
-                        name = "Android",
-                        modifier = Modifier.padding(innerPadding)
-                    )
+                Surface(modifier = Modifier.fillMaxSize()) {
+                    NotesScreen()
                 }
             }
         }
@@ -31,17 +38,43 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    Text(
-        text = "Hello $name!",
-        modifier = modifier
-    )
-}
+fun NotesScreen() {
+    var notes by remember { mutableStateOf(listOf<Note>()) }
+    var title by remember { mutableStateOf("") }
+    var content by remember { mutableStateOf("") }
+    var noteId by remember { mutableStateOf(1) }
 
-@Preview(showBackground = true)
-@Composable
-fun GreetingPreview() {
-    NotesAppComposeTheme {
-        Greeting("Android")
+    Column(modifier = Modifier.padding(16.dp)) {
+        OutlinedTextField(
+            value = title,
+            onValueChange = { title = it },
+            label = { Text("Title") },
+            modifier = Modifier.fillMaxWidth()
+        )
+        OutlinedTextField(
+            value = content,
+            onValueChange = { content = it },
+            label = { Text("Content") },
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        )
+        Button(
+            onClick = {
+                if (title.isNotBlank() && content.isNotBlank()) {
+                    notes = notes + Note(noteId++, title, content)
+                    title = ""
+                    content = ""
+                }
+            },
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text("Add Note")
+        }
+
+        LazyColumn(modifier = Modifier.padding(top = 16.dp)) {
+            items(notes.size) { index ->
+                val note = notes[index]
+                Text("${note.id}. ${note.title}: ${note.content}")
+            }
+        }
     }
 }
